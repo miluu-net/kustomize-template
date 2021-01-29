@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $GIT_REPO
+  namespace: NAMESPACE
+  labels:
+    app: $GIT_REPO
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: $GIT_REPO
+  template:
+    metadata:
+      name: $GIT_REPO
+      labels:
+        app: $GIT_REPO
+    spec:
+      serviceAccountName: scheduler
+      containers:
+      - name: $GIT_REPO
+        image: REGISTRY/NAMESPACE/IMAGE:TAG
+        imagePullPolicy: Always
+        env:
+          - name: NODE_ENV
+            value: 'real'
+          - name: PORT
+            value: '3000'
+        ports:
+        - containerPort: 3000
+        - containerPort: 9999
+        volumeMounts:
+          - name: storage-nas
+            mountPath: "/media"
+      volumes:
+        - name: storage-nas
+          persistentVolumeClaim:
+            claimName: storage-nas
+      imagePullSecrets:
+      - name: cr-key
